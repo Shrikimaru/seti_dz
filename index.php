@@ -6,17 +6,15 @@ ini_set("display_errors", 1);
 define("INFORM_VECTOR", "00001010011");
 define("POLINOM", "x4+x+1");
 
-class BitArray {
+class ArrayOfBits {
 
     public $vector;
 
     public function __construct($vector) {
-
         if (is_array($vector)) {
             $this->vector = $vector;
             return;
         }
-
         $this->vector = [];
         for ($i = 0; $i < strlen($vector); $i++) {
             $this->vector[$i] = (substr($vector, $i, 1) == "1");
@@ -39,7 +37,7 @@ class BitArray {
         return $str;
     }
 
-    public function equals(BitArray $obj) {
+    public function equals(ArrayOfBits $obj) {
         return ($this->getAsString() == $obj->getAsString());
     }
 }
@@ -52,7 +50,6 @@ class Term {
 
     public function __construct($strTerm) {
         $parts = preg_split("/".self::$variable."/", $strTerm);
-
         if (($parts[0] == "") && ($parts[1] == "")) {
             $this->coeff = 1;
             $this->power = 1;
@@ -81,12 +78,10 @@ class Polinom {
 
     public function __construct($strPolinom) {
         $arr = preg_split("/\+/", preg_replace("/-/", "+-", $strPolinom));
-
         foreach ($arr as $key => $value) {
             $term = new Term(trim($value));
             $this->terms[$term->getPower()] = $term;
         }
-
         $this->power = max(array_keys($this->terms));
     }
 
@@ -116,7 +111,6 @@ class Coder {
 
     private $polinomVector;
     private $polinomPower;
-
     private $errorPositions = [];
 
     public function __construct($strPolinom) {
@@ -148,26 +142,21 @@ class Coder {
         for ($i = 0; $i < $message->length() + $this->polinomPower; $i++) {
             $encoded[$i] = false;
         }
-
         for ($i = 0; $i < $message->length(); $i++) {
             $encoded[$i] = ($encoded[$i] xor $message->getVector()[$i]);
-
             if ($encoded[$i]) {
                 for ($j = 0; $j < $this->polinomPower + 1; $j++) {
                     $encoded[$i+$j] = ($encoded[$i+$j] xor $this->polinomVector[$j]);
                 }
             }
         }
-
         $encoded = array_replace($encoded, $message->getVector());
         return new Message($encoded);
     }
 
     public function decode(Message $message) {
         $originalMessageLength = $message->length() - $this->polinomPower;
-
         $residue = $message->getVector();
-
         for ($i = 0; $i < $originalMessageLength; $i++) {
             if ($residue[$i]) {
                 for ($j = 0; $j < $this->polinomPower + 1; $j++) {
@@ -175,16 +164,12 @@ class Coder {
                 }
             }
         }
-
         $syndrome = array_slice($residue, $originalMessageLength, $this->polinomPower);
-
         $decoded = array_slice($message->getVector(), 0, $originalMessageLength);
-
-        if (isset($this->errorPositions[(new BitArray($syndrome))->getAsString()])) {
-            $errorPosition = $this->errorPositions[(new BitArray($syndrome))->getAsString()];
+        if (isset($this->errorPositions[(new ArrayOfBits($syndrome))->getAsString()])) {
+            $errorPosition = $this->errorPositions[(new ArrayOfBits($syndrome))->getAsString()];
             $decoded[$errorPosition] = !$decoded[$errorPosition];
         }
-
         return new Message($decoded);
     }
 }
@@ -196,31 +181,27 @@ class Channel {
         if ($message->length() != $errors->length()) {
             throw new Exception("Вектор сообщения и ошибки должны быть одной длины");
         }
-
         $receivedMessage = $message->getVector();
         for ($i = 0; $i < $message->length(); $i++) {
             $receivedMessage[$i] = ($receivedMessage[$i] xor $errors->getVector()[$i]);
         }
-
         return new Message($receivedMessage);
     }
 }
 
-class Error extends BitArray{
-
+class Error extends ArrayOfBits{
     public function __construct($vector) {
         parent::__construct($vector);
     }
 }
 
-class Message extends BitArray {
-
+class Message extends ArrayOfBits {
     public function __construct($vector) {
         parent::__construct($vector);
     }
 }
 
-class ErrorGenerator {
+class GeneratorOfErrors {
     public static function generate($length, $multiplicity) {
         $errors = [];
         for ($i = 0; $i < pow(2, $length); $i++) {
@@ -262,11 +243,8 @@ function fact($n) {
 
 $message = new Message(INFORM_VECTOR);
 $coder = new Coder(POLINOM);
-
 $channel = new Channel();
-
 $encoded = $coder->encode($message);
-
 $encodedMessageSize = $message->length() + $coder->getPower();
 
 echo "| i | Cin | Nk | Ck |" . "\n";
@@ -275,20 +253,16 @@ echo "_____________________" . "\n";
 for ($i = 1; $i < $encodedMessageSize + 1; $i++) {
     $correctErrorCount = 0;
     $errorMultiplicity = $i;
-
     $errorCount = fact($encodedMessageSize) / (fact($encodedMessageSize-$errorMultiplicity) * fact($errorMultiplicity));
-
-    $errors = ErrorGenerator::generate($encodedMessageSize, $errorMultiplicity);
+    $errors = GeneratorOfErrors::generate($encodedMessageSize, $errorMultiplicity);
 
     foreach ($errors as $key => $error) {
         $response = $channel->transmit($encoded, $error);
         $decoded = $coder->decode($response);
-
         if ($message->equals($decoded)) {
             $correctErrorCount++;
         }
     }
-
     $correctionCoefficient = $correctErrorCount / count($errors);
 
     echo
