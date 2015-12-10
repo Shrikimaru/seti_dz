@@ -1,16 +1,20 @@
 <?php
 
+namespace main;
+
 error_reporting(E_ALL | E_STRICT);
 ini_set("display_errors", 1);
 
 define("INFORM_VECTOR", "00001010011");
 define("POLINOM", "x4+x+1");
 
-class ArrayOfBits {
+class ArrayOfBits
+{
 
     public $vector;
 
-    public function __construct($vector) {
+    public function __construct($vector)
+    {
         if (is_array($vector)) {
             $this->vector = $vector;
             return;
@@ -21,15 +25,18 @@ class ArrayOfBits {
         }
     }
 
-    public function length() {
+    public function length()
+    {
         return count($this->vector);
     }
 
-    public function getVector() {
+    public function getVector()
+    {
         return $this->vector;
     }
 
-    public function getAsString() {
+    public function getAsString()
+    {
         $str = "";
         foreach ($this->vector as $key => $value) {
             $str .= $value ? "1" : "0";
@@ -37,18 +44,21 @@ class ArrayOfBits {
         return $str;
     }
 
-    public function equals(ArrayOfBits $obj) {
+    public function equals(ArrayOfBits $obj)
+    {
         return ($this->getAsString() == $obj->getAsString());
     }
 }
 
-class Term {
+class Term
+{
 
     public static $variable = "x";
     private $coeff;
     private $power;
 
-    public function __construct($strTerm) {
+    public function __construct($strTerm)
+    {
         $parts = preg_split("/".self::$variable."/", $strTerm);
         if (($parts[0] == "") && ($parts[1] == "")) {
             $this->coeff = 1;
@@ -62,21 +72,25 @@ class Term {
         }
     }
 
-    public function getPower() {
+    public function getPower()
+    {
         return $this->power;
     }
 
-    public function compareTo(Term $o) {
+    public function compareTo(Term $o)
+    {
         return $this->power == $o->getPower();
     }
 }
 
-class Polinom {
+class Polinom
+{
 
     private $terms = [];
     private $power;
 
-    public function __construct($strPolinom) {
+    public function __construct($strPolinom)
+    {
         $arr = preg_split("/\+/", preg_replace("/-/", "+-", $strPolinom));
         foreach ($arr as $key => $value) {
             $term = new Term(trim($value));
@@ -85,11 +99,13 @@ class Polinom {
         $this->power = max(array_keys($this->terms));
     }
 
-    public function getPower() {
+    public function getPower()
+    {
         return $this->power;
     }
 
-    public function getVector() {
+    public function getVector()
+    {
         $vector = [];
         for ($i = $this->power; $i > -1; $i--) {
             $vector[$this->power - $i] = array_key_exists($i, $this->terms);
@@ -97,7 +113,8 @@ class Polinom {
         return $vector;
     }
 
-    public function toString() {
+    public function toString()
+    {
         $str = "";
         $vector = $this->getVector();
         foreach ($vector as $key => $value) {
@@ -107,13 +124,257 @@ class Polinom {
     }
 }
 
-class Coder {
+function division($a, $b)
+{
+    $sizeA = count($a);
+    $sizeB = count($b);
+    $rest = [0, 0, 0, 0, 0];
+    $counter = 0;
+    $counterSize = 0;
+    $myArraySize = 0;
+    $counterMy = 0;
+    $counterB = 0;
+
+    for ($k = 0; $k < $sizeA; $k++) {
+        if ($a[$k] == 0) {
+            $counter++;
+            continue;
+        }
+        $k = $sizeA;
+    }
+    $rest[0] = $a[$counter];
+    for ($i = $counter; $i < $sizeA; $i += $sizeB) {
+        if ($i != $counter) {
+            for ($j = $i; $j < $sizeA; $j++) {
+                $counterB = 0;
+                $myArraySize = 0;
+                if ($counterSize <= 1) {
+                    if ($counterMy <= 4) {
+                        goto a;
+                    }
+                    for ($s = 0; $s < $sizeB; $s++) {
+                        if ($rest[$s] != $b[$s]) {
+                            $rest[$myArraySize] = 1;
+                            $myArraySize++;
+                        }
+                        if ($rest[$s] == $b[$s]) {
+                            if ($s > 0) {
+                                $rest[$myArraySize] = 0;
+                                $myArraySize++;
+                            }
+                            if ($s == ($sizeB - 1)) {
+                                if ($counterSize == 1) {
+                                    if ($myArraySize == 3) {
+                                        $rest[$myArraySize] = $a[$j + 1];
+                                        $myArraySize++;
+                                    }
+                                }
+                                goto a;
+                            }
+                        }
+                    }
+                }
+                for ($s = 0; $s < $sizeB; $s++) {
+
+                    if ($rest[$s] != $b[$s]) {
+                        $rest[$myArraySize] = 1;
+                        $counterB = 1;
+                        $myArraySize++;
+                    }
+
+                    if ($rest[$s] == $b[$s]) {
+                        if ($counterB == 1) {
+                            $rest[$myArraySize] = 0;
+                            $myArraySize++;
+                        }
+                    }
+
+                    if ($s == ($sizeB - 1)) {
+
+                        if ($myArraySize == 1) {
+                            $rest[$myArraySize] = $a[$j+$s];
+                            $myArraySize++;
+                            $counterSize = $counterSize - 1;
+                            if ($myArraySize == 2) {
+                                $rest[$myArraySize] = $a[$j+$s+1];
+                                $myArraySize++;
+                                $counterSize--;
+                                if ($myArraySize == 3) {
+                                    $rest[$myArraySize] = $a[$j+$s+2];
+                                    $myArraySize++;
+                                    $counterSize--;
+                                    if ($myArraySize == 4) {
+                                        $rest[$myArraySize] = $a[$j+$s+3];
+                                        $myArraySize++;
+                                        $counterSize--;
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($myArraySize == 2) {
+                            $rest[$myArraySize] = $a[$j+1];
+                            $myArraySize++;
+                            $counterSize = $counterSize - 1;
+                            if ($myArraySize == 3) {
+                                $rest[$myArraySize] = $a[$j+2];
+                                $myArraySize++;
+                                $counterSize = $counterSize - 1;
+                                $i++;
+                                if ($myArraySize == 4) {
+                                    $rest[$myArraySize] = $a[$j+3];
+                                    $myArraySize++;
+                                    $counterSize = $counterSize - 1;
+                                    $i++;
+                                }
+                            }
+                        }
+
+                        if ($myArraySize == 3) {
+                            $rest[$myArraySize] = $a[$j+1];
+                            $myArraySize++;
+                            $counterSize = $counterSize - 1;
+                            if ($myArraySize == 4) {
+                                $rest[$myArraySize] = $a[$j+2];
+                                $myArraySize++;
+                                $counterSize = $counterSize - 1;
+                                $i ++;
+                            }
+                        }
+                        if ($myArraySize == 4) {
+                            $rest[$myArraySize] = $a[$j+1];
+                            $myArraySize++;
+                            $counterSize = $counterSize - 1;
+                        }
+                        continue;
+                    }
+                }
+                $counterMy = $myArraySize;
+                $myArraySize = 0;
+                if ($counterSize == -1) {
+                    $counterMy = 4;
+                }
+            }
+        }
+
+        if ($i == $counter) {
+            for ($j = 0; $j < $sizeB; $j++) {
+
+                if ($rest[$j] != $b[$j]) {
+                    $rest[$myArraySize] = 1;
+                    $counterB = 1;
+                    $myArraySize++;
+                }
+
+                if ($rest[$j]==$b[$j]) {
+                    if ($counterB == 1) {
+                        $rest[$myArraySize] = 0;
+                        $myArraySize++;
+                    }
+                }
+
+                if ($j==$sizeB-1) {
+                    $counterMy = $myArraySize;
+                }
+
+                if ($counterMy < $sizeB) {
+                    $rest[$j+1] = $a[$i+$j+1];
+                    if ($j == ($sizeB-1)) {
+
+                        if ($myArraySize == 1) {
+                            $rest[$myArraySize] = $a[$i+$j+1];
+                            $myArraySize++;
+                            $counterSize = $sizeA - $sizeB - $counter - 1;
+
+                            if ($myArraySize == 2) {
+                                $rest[$myArraySize] = $a[$i+$j+2];
+                                $myArraySize++;
+                                $counterSize = $counterSize - 1;
+
+                                if ($myArraySize == 3) {
+                                    $rest[$myArraySize] = $a[$i+$j+3];
+                                    $myArraySize++;
+                                    $counterSize = $counterSize - 1;
+
+                                    if ($myArraySize == 4) {
+                                        $rest[$myArraySize] = $a[$i+$j+4];
+                                        $myArraySize++;
+                                        $counterSize = $counterSize - 1;
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($myArraySize == 2) {
+                            $rest[$myArraySize] = $a[$i+$j+1];
+                            $myArraySize++;
+                            $counterSize = $sizeA - $sizeB - $counter - 1;
+                            if ($myArraySize == 3) {
+                                $rest[$myArraySize] = $a[$i+$j+2];
+                                $myArraySize++;
+                                $counterSize = $counterSize - 1;
+                                $i++;
+                                if ($myArraySize == 4) {
+                                    $rest[$myArraySize] = $a[$j+3];
+                                    $myArraySize++;
+                                    $counterSize = $counterSize - 1;
+                                    $i++;
+                                }
+                            }
+                        }
+
+                        if ($myArraySize == 3) {
+                            $rest[$myArraySize] = $a[$i+$j+1];
+                            $myArraySize++;
+                            $counterSize = $sizeA - $sizeB - $counter - 1;
+                            if ($myArraySize == 4) {
+                                $rest[$myArraySize] = $a[$i+$j+2];
+                                $myArraySize++;
+                                $counterSize = $counterSize - 1;
+                                $i ++;
+                            }
+                        }
+                        if ($myArraySize == 4) {
+                            $rest[$myArraySize] = $a[$i+$j+1];
+                            $myArraySize++;
+                            $counterSize = $sizeA - $sizeB - $counter - 1;
+                        }
+                    }
+                }
+            }
+            $counterMy = $myArraySize;
+            $myArraySize = 0;
+            $counterB = 0;
+        }
+    }
+
+    a:
+    $CoRes = [];
+    for ($i = 1; $i <= 15; $i++) {
+//        $outputa = fact(15);
+//        $outputb = fact($i);
+//        $outputc = fact(15 - $i);
+//        $outputd = ($outputa / ($outputb*$outputc));
+//        $Co = $i / $outputd;
+        $CoRes[$i] = 15 - $i + 1;
+    }
+    return $CoRes;
+}
+
+class Coder
+{
 
     private $polinomVector;
     private $polinomPower;
     private $errorPositions = [];
 
-    public function __construct($strPolinom) {
+    public function getPolinomVector()
+    {
+        return $this->polinomVector;
+    }
+
+    public function __construct($strPolinom)
+    {
         $polinom = new Polinom($strPolinom);
         $this->polinomVector = $polinom->getVector();
         $this->polinomPower = $polinom->getPower();
@@ -133,11 +394,13 @@ class Coder {
         ];
     }
 
-    public function getPower() {
+    public function getPower()
+    {
         return $this->polinomPower;
     }
 
-    public function encode(Message $message) {
+    public function encode(Message $message)
+    {
         $encoded = [];
         for ($i = 0; $i < $message->length() + $this->polinomPower; $i++) {
             $encoded[$i] = false;
@@ -154,7 +417,8 @@ class Coder {
         return new Message($encoded);
     }
 
-    public function decode(Message $message) {
+    public function decode(Message $message)
+    {
         $originalMessageLength = $message->length() - $this->polinomPower;
         $residue = $message->getVector();
         for ($i = 0; $i < $originalMessageLength; $i++) {
@@ -174,10 +438,15 @@ class Coder {
     }
 }
 
-class Channel {
-    public function __construct() {}
+class Channel
+{
+    public function __construct()
+    {
 
-    public function transmit(Message $message, Error $errors) {
+    }
+
+    public function transmit(Message $message, Error $errors)
+    {
         if ($message->length() != $errors->length()) {
             throw new Exception("Вектор сообщения и ошибки должны быть одной длины");
         }
@@ -189,20 +458,26 @@ class Channel {
     }
 }
 
-class Error extends ArrayOfBits{
-    public function __construct($vector) {
+class Error extends ArrayOfBits
+{
+    public function __construct($vector)
+    {
         parent::__construct($vector);
     }
 }
 
-class Message extends ArrayOfBits {
-    public function __construct($vector) {
+class Message extends ArrayOfBits
+{
+    public function __construct($vector)
+    {
         parent::__construct($vector);
     }
 }
 
-class GeneratorOfErrors {
-    public static function generate($length, $multiplicity) {
+class GeneratorOfErrors
+{
+    public static function generate($length, $multiplicity)
+    {
         $errors = [];
         for ($i = 0; $i < pow(2, $length); $i++) {
             if (self::getTrueCount($i) == $multiplicity) {
@@ -214,7 +489,8 @@ class GeneratorOfErrors {
         return $errors;
     }
 
-    public static function toBits($number, $length) {
+    public static function toBits($number, $length)
+    {
         $bits = [];
         for ($i = $length - 1; $i >= 0; $i--) {
             $bits[$i] = ($number & (1 << $i)) != 0;
@@ -222,7 +498,8 @@ class GeneratorOfErrors {
         return $bits;
     }
 
-    public static function getTrueCount($number) {
+    public static function getTrueCount($number)
+    {
         $count = 0;
         for (; $number > 0; $number >>= 1) {
             if (($number & 1) == 1) {
@@ -233,7 +510,8 @@ class GeneratorOfErrors {
     }
 }
 
-function fact($n) {
+function fact($n)
+{
     $fact = 1;
     for ($i = 1; $i <= $n; $i++) {
         $fact *= $i;
@@ -247,8 +525,10 @@ $channel = new Channel();
 $encoded = $coder->encode($message);
 $encodedMessageSize = $message->length() + $coder->getPower();
 
-echo "| i | Cin | Nk | Ck |" . "\n";
-echo "_____________________" . "\n";
+$numOfErrorsDetected = division($message->getVector(), $coder->getPolinomVector());
+
+echo "| i | Cin | No | Nk | Ck |" . "\n";
+echo "__________________________" . "\n";
 
 for ($i = 1; $i < $encodedMessageSize + 1; $i++) {
     $correctErrorCount = 0;
@@ -268,8 +548,7 @@ for ($i = 1; $i < $encodedMessageSize + 1; $i++) {
     echo
         "| ". $errorMultiplicity . " |" .
         " " . $errorCount . " |" .
+        " " . $numOfErrorsDetected[$i] . " |" .
         " " . $correctErrorCount . " |" .
         " " . $correctionCoefficient . " |\n";
 }
-
-?>
