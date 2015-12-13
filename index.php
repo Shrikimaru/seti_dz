@@ -124,249 +124,11 @@ class Polinom
     }
 }
 
-function division($a, $b)
-{
-    $sizeA = count($a);
-    $sizeB = count($b);
-    $rest = [0, 0, 0, 0, 0];
-    $counter = 0;
-    $counterSize = 0;
-    $myArraySize = 0;
-    $counterMy = 0;
-    $counterB = 0;
-
-    for ($k = 0; $k < $sizeA; $k++) {
-        if ($a[$k] == 0) {
-            $counter++;
-            continue;
-        }
-        $k = $sizeA;
-    }
-    $rest[0] = $a[$counter];
-    for ($i = $counter; $i < $sizeA; $i += $sizeB) {
-        if ($i != $counter) {
-            for ($j = $i; $j < $sizeA; $j++) {
-                $counterB = 0;
-                $myArraySize = 0;
-                if ($counterSize <= 1) {
-                    if ($counterMy <= 4) {
-                        goto a;
-                    }
-                    for ($s = 0; $s < $sizeB; $s++) {
-                        if ($rest[$s] != $b[$s]) {
-                            $rest[$myArraySize] = 1;
-                            $myArraySize++;
-                        }
-                        if ($rest[$s] == $b[$s]) {
-                            if ($s > 0) {
-                                $rest[$myArraySize] = 0;
-                                $myArraySize++;
-                            }
-                            if ($s == ($sizeB - 1)) {
-                                if ($counterSize == 1) {
-                                    if ($myArraySize == 3) {
-                                        $rest[$myArraySize] = $a[$j + 1];
-                                        $myArraySize++;
-                                    }
-                                }
-                                goto a;
-                            }
-                        }
-                    }
-                }
-                for ($s = 0; $s < $sizeB; $s++) {
-
-                    if ($rest[$s] != $b[$s]) {
-                        $rest[$myArraySize] = 1;
-                        $counterB = 1;
-                        $myArraySize++;
-                    }
-
-                    if ($rest[$s] == $b[$s]) {
-                        if ($counterB == 1) {
-                            $rest[$myArraySize] = 0;
-                            $myArraySize++;
-                        }
-                    }
-
-                    if ($s == ($sizeB - 1)) {
-
-                        if ($myArraySize == 1) {
-                            $rest[$myArraySize] = $a[$j+$s];
-                            $myArraySize++;
-                            $counterSize = $counterSize - 1;
-                            if ($myArraySize == 2) {
-                                $rest[$myArraySize] = $a[$j+$s+1];
-                                $myArraySize++;
-                                $counterSize--;
-                                if ($myArraySize == 3) {
-                                    $rest[$myArraySize] = $a[$j+$s+2];
-                                    $myArraySize++;
-                                    $counterSize--;
-                                    if ($myArraySize == 4) {
-                                        $rest[$myArraySize] = $a[$j+$s+3];
-                                        $myArraySize++;
-                                        $counterSize--;
-                                    }
-                                }
-                            }
-                        }
-
-                        if ($myArraySize == 2) {
-                            $rest[$myArraySize] = $a[$j+1];
-                            $myArraySize++;
-                            $counterSize = $counterSize - 1;
-                            if ($myArraySize == 3) {
-                                $rest[$myArraySize] = $a[$j+2];
-                                $myArraySize++;
-                                $counterSize = $counterSize - 1;
-                                $i++;
-                                if ($myArraySize == 4) {
-                                    $rest[$myArraySize] = $a[$j+3];
-                                    $myArraySize++;
-                                    $counterSize = $counterSize - 1;
-                                    $i++;
-                                }
-                            }
-                        }
-
-                        if ($myArraySize == 3) {
-                            $rest[$myArraySize] = $a[$j+1];
-                            $myArraySize++;
-                            $counterSize = $counterSize - 1;
-                            if ($myArraySize == 4) {
-                                $rest[$myArraySize] = $a[$j+2];
-                                $myArraySize++;
-                                $counterSize = $counterSize - 1;
-                                $i ++;
-                            }
-                        }
-                        if ($myArraySize == 4) {
-                            $rest[$myArraySize] = $a[$j+1];
-                            $myArraySize++;
-                            $counterSize = $counterSize - 1;
-                        }
-                        continue;
-                    }
-                }
-                $counterMy = $myArraySize;
-                $myArraySize = 0;
-                if ($counterSize == -1) {
-                    $counterMy = 4;
-                }
-            }
-        }
-
-        if ($i == $counter) {
-            for ($j = 0; $j < $sizeB; $j++) {
-
-                if ($rest[$j] != $b[$j]) {
-                    $rest[$myArraySize] = 1;
-                    $counterB = 1;
-                    $myArraySize++;
-                }
-
-                if ($rest[$j]==$b[$j]) {
-                    if ($counterB == 1) {
-                        $rest[$myArraySize] = 0;
-                        $myArraySize++;
-                    }
-                }
-
-                if ($j==$sizeB-1) {
-                    $counterMy = $myArraySize;
-                }
-
-                if ($counterMy < $sizeB) {
-                    $rest[$j+1] = $a[$i+$j+1];
-                    if ($j == ($sizeB-1)) {
-
-                        if ($myArraySize == 1) {
-                            $rest[$myArraySize] = $a[$i+$j+1];
-                            $myArraySize++;
-                            $counterSize = $sizeA - $sizeB - $counter - 1;
-
-                            if ($myArraySize == 2) {
-                                $rest[$myArraySize] = $a[$i+$j+2];
-                                $myArraySize++;
-                                $counterSize = $counterSize - 1;
-
-                                if ($myArraySize == 3) {
-                                    $rest[$myArraySize] = $a[$i+$j+3];
-                                    $myArraySize++;
-                                    $counterSize = $counterSize - 1;
-
-                                    if ($myArraySize == 4) {
-                                        $rest[$myArraySize] = $a[$i+$j+4];
-                                        $myArraySize++;
-                                        $counterSize = $counterSize - 1;
-                                    }
-                                }
-                            }
-                        }
-
-                        if ($myArraySize == 2) {
-                            $rest[$myArraySize] = $a[$i+$j+1];
-                            $myArraySize++;
-                            $counterSize = $sizeA - $sizeB - $counter - 1;
-                            if ($myArraySize == 3) {
-                                $rest[$myArraySize] = $a[$i+$j+2];
-                                $myArraySize++;
-                                $counterSize = $counterSize - 1;
-                                $i++;
-                                if ($myArraySize == 4) {
-                                    $rest[$myArraySize] = $a[$j+3];
-                                    $myArraySize++;
-                                    $counterSize = $counterSize - 1;
-                                    $i++;
-                                }
-                            }
-                        }
-
-                        if ($myArraySize == 3) {
-                            $rest[$myArraySize] = $a[$i+$j+1];
-                            $myArraySize++;
-                            $counterSize = $sizeA - $sizeB - $counter - 1;
-                            if ($myArraySize == 4) {
-                                $rest[$myArraySize] = $a[$i+$j+2];
-                                $myArraySize++;
-                                $counterSize = $counterSize - 1;
-                                $i ++;
-                            }
-                        }
-                        if ($myArraySize == 4) {
-                            $rest[$myArraySize] = $a[$i+$j+1];
-                            $myArraySize++;
-                            $counterSize = $sizeA - $sizeB - $counter - 1;
-                        }
-                    }
-                }
-            }
-            $counterMy = $myArraySize;
-            $myArraySize = 0;
-            $counterB = 0;
-        }
-    }
-
-    a:
-    $CoRes = [];
-    for ($i = 1; $i <= 15; $i++) {
-//        $outputa = fact(15);
-//        $outputb = fact($i);
-//        $outputc = fact(15 - $i);
-//        $outputd = ($outputa / ($outputb*$outputc));
-//        $Co = $i / $outputd;
-        $CoRes[$i] = 15 - $i + 1;
-    }
-    return $CoRes;
-}
-
 class Coder
 {
 
     private $polinomVector;
     private $polinomPower;
-    private $errorPositions = [];
 
     public function getPolinomVector()
     {
@@ -378,20 +140,6 @@ class Coder
         $polinom = new Polinom($strPolinom);
         $this->polinomVector = $polinom->getVector();
         $this->polinomPower = $polinom->getPower();
-
-        $this->errorPositions = [
-            "1001" => 0,
-            "1101" => 1,
-            "1111" => 2,
-            "1110" => 3,
-            "0111" => 4,
-            "1010" => 5,
-            "0101" => 6,
-            "1011" => 7,
-            "1100" => 8,
-            "0110" => 9,
-            "0011" => 10
-        ];
     }
 
     public function getPower()
@@ -419,7 +167,8 @@ class Coder
 
     public function decode(Message $message)
     {
-        $originalMessageLength = $message->length() - $this->polinomPower;
+        $encodedMessageLength = $message->length();
+        $originalMessageLength = $encodedMessageLength - $this->polinomPower;
         $residue = $message->getVector();
         for ($i = 0; $i < $originalMessageLength; $i++) {
             if ($residue[$i]) {
@@ -428,11 +177,33 @@ class Coder
                 }
             }
         }
+
         $syndrome = array_slice($residue, $originalMessageLength, $this->polinomPower);
         $decoded = array_slice($message->getVector(), 0, $originalMessageLength);
-        if (isset($this->errorPositions[(new ArrayOfBits($syndrome))->getAsString()])) {
-            $errorPosition = $this->errorPositions[(new ArrayOfBits($syndrome))->getAsString()];
-            $decoded[$errorPosition] = !$decoded[$errorPosition];
+
+        // Исправление ошибки
+        for ($i = 0; $i < $originalMessageLength; $i++) {
+
+            $errorVector = [];
+            for ($p = 0; $p < $encodedMessageLength; $p++) {
+                $errorVector[$p] = 0;
+            }
+            $errorVector[$i] = 1;
+
+            for ($j = 0; $j < $originalMessageLength; $j++) {
+                if ($errorVector[$j]) {
+                    for ($k = 0; $k < $this->polinomPower + 1; $k++) {
+                        $errorVector[$j + $k] = ($errorVector[$j + $k] xor ($this->polinomVector[$k]));
+                    }
+                }
+            }
+
+            $syndromeTest = array_slice($errorVector, $originalMessageLength, $this->polinomPower);
+
+            if ((new ArrayOfBits($syndrome))->getAsString() == (new ArrayOfBits($syndromeTest))->getAsString()) {
+                $errorPosition = $i;
+                $decoded[$errorPosition] = !$decoded[$errorPosition];
+            }
         }
         return new Message($decoded);
     }
@@ -525,9 +296,9 @@ $channel = new Channel();
 $encoded = $coder->encode($message);
 $encodedMessageSize = $message->length() + $coder->getPower();
 
-$numOfErrorsDetected = division($message->getVector(), $coder->getPolinomVector());
+$numOfErrorsDetected = [];
 
-echo "| i | Cin | No | Nk | Ck |" . "\n";
+echo "| i | Cin | Nk | Ck |" . "\n";
 echo "__________________________" . "\n";
 
 for ($i = 1; $i < $encodedMessageSize + 1; $i++) {
@@ -548,7 +319,6 @@ for ($i = 1; $i < $encodedMessageSize + 1; $i++) {
     echo
         "| ". $errorMultiplicity . " |" .
         " " . $errorCount . " |" .
-        " " . $numOfErrorsDetected[$i] . " |" .
         " " . $correctErrorCount . " |" .
         " " . $correctionCoefficient . " |\n";
 }
